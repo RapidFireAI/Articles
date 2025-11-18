@@ -1,11 +1,11 @@
 ---
-title: "Accelerating DPO Training with RapidFire AI: Official TRL Integration"
+title: "Run 20× More DPO Experiments: Official RapidFire AI Integration for TRL"
 thumbnail: /blog/assets/rapidfire-dpo/thumbnail.png
 authors:
 - user: your-hf-username
 ---
 
-# Accelerating DPO Training with RapidFire AI: Official TRL Integration
+# Run 20× More DPO Experiments: Official RapidFire AI Integration for TRL
 
 **Hugging Face TRL now officially integrates with RapidFire AI**<sup>[[1]](https://huggingface.co/docs/trl/en/rapidfire_integration)</sup>, bringing massive speedups to Direct Preference Optimization (DPO) workflows. If you're using TRL's `DPOTrainer` to align LLMs with human preferences, you can now run multiple DPO configurations concurrently—even on a single GPU—and compare them in near real-time with **16-24× higher experimentation throughput**. This speedup comes from RapidFire AI's chunk-based scheduling approach, which enables concurrent training of multiple configurations while efficiently stopping underperforming runs early—as detailed in [this technical explanation](https://www.rapidfire.ai/blogs/rapid-experimentation-16-24x-more-throughput-without-extra-gpus).
 
