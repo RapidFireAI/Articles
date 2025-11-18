@@ -17,8 +17,9 @@ With **RapidFire AI's official TRL integration**, you can now turn slow, sequent
 
 DPO aligns a policy model to human preferences by optimizing a contrastive objective over paired responses to the same prompt: a chosen (preferred) and a rejected (dispreferred) completion. Instead of fitting a separate reward model, DPO computes relative preference using log-probability differences between the policy and a reference model, scaled by a temperature β. In practice, you'll watch signals like rewards for chosen vs. rejected responses, accuracy of preference ordering, and reward margins to assess whether the policy is learning to prefer the right outputs.
 
-![DPO Preference Pair and Reward Margin](https://raw.githubusercontent.com/RapidFireAI/Articles/main/DPO/DPO-diagram.png)
-*DPO compares chosen and rejected responses: The policy and reference models compute log-probabilities for both responses, and the algorithm uses the difference (scaled by β) to train the policy to prefer the chosen response.*
+<img src="https://raw.githubusercontent.com/RapidFireAI/Articles/main/DPO/DPO-diagram.png" alt="DPO Training Workflow" style="width: 50%;">
+
+*DPO training workflow: Start with preference data (chosen/rejected pairs), initialize policy and reference models from an SFT model, compute DPO loss by comparing policy vs reference log-probabilities, then update the policy to prefer chosen responses.*
 
 ## The Problem: Alignment Work That Moves Too Slowly
 
