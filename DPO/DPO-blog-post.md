@@ -13,7 +13,14 @@ Modern LLM teams know that "good enough" models rarely stay good for long. As da
 
 With **RapidFire AI's official TRL integration**, you can now turn slow, sequential DPO experiments into fast, adaptive, multi-configuration runs you can steer in real time. The integration requires minimal code changes and enables teams to compare multiple DPO configurations efficiently.
 
-### The pain: alignment work that moves too slowly
+## What is DPO?
+
+DPO aligns a policy model to human preferences by optimizing a contrastive objective over paired responses to the same prompt: a chosen (preferred) and a rejected (dispreferred) completion. Instead of fitting a separate reward model, DPO computes relative preference using log-probability differences between the policy and a reference model, scaled by a temperature β. In practice, you'll watch signals like rewards for chosen vs. rejected responses, accuracy of preference ordering, and reward margins to assess whether the policy is learning to prefer the right outputs.
+
+![DPO Preference Pair and Reward Margin](https://raw.githubusercontent.com/RapidFireAI/Articles/main/DPO/DPO-diagram.png)
+*DPO compares chosen and rejected responses: The policy and reference models compute log-probabilities for both responses, and the algorithm uses the difference (scaled by β) to train the policy to prefer the chosen response.*
+
+## The Problem: Alignment Work That Moves Too Slowly
 
 If you’ve ever staged a DPO pipeline, you’ve probably felt at least one of these:
 
@@ -23,7 +30,7 @@ If you’ve ever staged a DPO pipeline, you’ve probably felt at least one of t
 
 RapidFire AI addresses these issues head-on with adaptive execution, multi-config APIs, a live dashboard, and "Interactive Control Ops" (IC Ops) that let you guide experiments as they learn.
 
-## How it works
+## The Solution: How RapidFire AI Works
 
 RapidFire AI splits your dataset randomly into "chunks" and cycles LLM configurations through the GPUs at chunk boundaries. You get incremental signal on eval metrics across all configs much more quickly. The automatic checkpointing via an efficient shared-memory-based adapter/model spilling/loading mechanism keeps training smooth, stable, and consistent. Use IC Ops to adapt mid-flight to stop low-performers earlier and clone promising ones with tweaked config knobs, optionally warm-starting from the parent's weights.
 
@@ -62,14 +69,7 @@ rapidfireai start
 
 The dashboard will be available at `http://localhost:3000` where you can monitor and control experiments in real-time.
 
-## DPO in One Paragraph
-
-DPO aligns a policy model to human preferences by optimizing a contrastive objective over paired responses to the same prompt: a chosen (preferred) and a rejected (dispreferred) completion. Instead of fitting a separate reward model, DPO computes relative preference using log-probability differences between the policy and a reference model, scaled by a temperature β. In practice, you’ll watch signals like rewards for chosen vs. rejected responses, accuracy of preference ordering, and reward margins to assess whether the policy is learning to prefer the right outputs.
-
-[Diagram placeholder — "Preference pair and reward margin"]
-Show a prompt with two responses (chosen/rejected), arrows to policy and reference log-probs, and the resulting chosen/rejected rewards and margin.
-
-## Minimal TRL DPO Example
+## Example: Running Multiple DPO Configurations Concurrently
 
 Here's a complete example showing how RapidFire AI integrates with TRL's `DPOTrainer` to run multiple DPO configurations concurrently. The key difference from standard TRL usage is wrapping your configs with RapidFire's multi-config wrappers—everything else stays the same.
 
@@ -256,13 +256,13 @@ The speedup comes from three key factors:
 
 The result: **You get signals 16-24× faster**, make decisions sooner, and spend GPU budget only on promising configurations.
 
-## The Bottom Line
+## Conclusion
 
 DPO is an elegant way to align LLMs to human preference signals, but the difference between a great DPO system and a merely adequate one is the speed and clarity of your experimentation loop. RapidFire AI's official TRL integration provides: multi-config orchestration, chunked advancement for early comparative signal, real-time control with IC Ops, and built-in visualization. The net effect is simple: more informed decisions, sooner, at lower cost.
 
 If you're using TRL's `DPOTrainer` for alignment work, the integration provides a way to efficiently explore multiple configurations in parallel, helping you find better alignment settings with the same GPU budget.
 
-## Get Started Today
+### Get Started Today
 
 Ready to accelerate your DPO experiments? The RapidFire AI integration with TRL is open source and easy to get started:
 
