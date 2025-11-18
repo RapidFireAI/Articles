@@ -1,12 +1,23 @@
+---
+title: "Accelerating GRPO Training with RapidFire AI: Official TRL Integration"
+thumbnail: /blog/assets/rapidfire-grpo/thumbnail.png
+authors:
+- user: your-hf-username
+---
+
 # Accelerating GRPO Training with RapidFire AI: Official TRL Integration
 
-**Hugging Face TRL now officially integrates with RapidFire AI**, bringing massive speedups to Group Relative Policy Optimization (GRPO) workflows. If you're using TRL's `GRPOTrainer` to improve mathematical reasoning and structured outputs in LLMs, you can now run multiple GRPO configurations concurrently—even on a single GPU—and compare them in near real-time with **16-24× higher experimentation throughput**.
+**Hugging Face TRL now officially integrates with RapidFire AI**, enabling concurrent execution of multiple Group Relative Policy Optimization (GRPO) configurations. If you're using TRL's `GRPOTrainer` to improve mathematical reasoning and structured outputs in LLMs, you can now run multiple GRPO configurations concurrently—even on a single GPU—and compare them in near real-time with **16–24× higher experimentation throughput**. This speedup comes from RapidFire AI's chunk-based scheduling approach, which enables concurrent training of multiple configurations while efficiently stopping underperforming runs early—as detailed in [this technical explanation](https://www.rapidfire.ai/blogs/rapid-experimentation-16-24x-more-throughput-without-extra-gpus).
 
-GRPO is particularly powerful for tasks requiring structured, step-by-step reasoning—like math problems, code generation, or complex question answering. But the real bottleneck isn't the algorithm. It's the experimentation loop: trying variations across base models, reward functions, LoRA configurations, learning rates, and generation parameters—before you commit serious GPU budget.
+Modern LLM teams working on reasoning tasks know that finding the right GRPO configuration requires extensive experimentation. GRPO is particularly effective for tasks requiring structured, step-by-step reasoning—like math problems, code generation, or complex question answering. But the real bottleneck isn't the algorithm. It's the experimentation loop: trying variations across base models, reward functions, LoRA configurations, learning rates, and generation parameters—before you commit serious GPU budget.
 
-With **RapidFire AI's official TRL integration**, you can now turn slow, sequential GRPO experiments into fast, adaptive, multi-configuration runs you can steer in real time. The integration is production-ready, requires minimal code changes, and is already being used by teams to ship better-reasoning models faster.
+With **RapidFire AI's official TRL integration**, you can now turn slow, sequential GRPO experiments into fast, adaptive, multi-configuration runs you can steer in real time. The integration requires minimal code changes and enables teams to compare multiple GRPO configurations efficiently.
 
-### The pain: GRPO experimentation that moves too slowly
+## GRPO in One Paragraph
+
+GRPO (Group Relative Policy Optimization) optimizes LLM responses by generating multiple candidate completions per prompt, computing rewards for each, and using group-relative advantages to update the policy. Unlike DPO which requires preference pairs, GRPO uses a single prompt with multiple sampled responses and their scalar rewards. In practice, you define custom reward functions (e.g., correctness, format compliance, reasoning quality) that evaluate each generated response, and GRPO learns to maximize these rewards while staying close to a reference policy via KL regularization.
+
+## The Problem: GRPO Experimentation That Moves Too Slowly
 
 If you've ever run GRPO training, you've probably felt at least one of these:
 
@@ -14,7 +25,15 @@ If you've ever run GRPO training, you've probably felt at least one of these:
 - Sequential, GPU-hogging runs hide early comparative signals and delay insight.
 - Mid-run pivots are costly; stopping losers and branching winners is hard.
 
-RapidFire AI addresses these issues head-on with adaptive execution, multi-config APIs, a live dashboard, and "Interactive Control Ops" (IC Ops) that let you guide experiments as they learn.
+RapidFire AI addresses these issues with adaptive execution, multi-config APIs, a live dashboard, and "Interactive Control Ops" (IC Ops) that let you guide experiments as they learn.
+
+## The Solution: How RapidFire AI Works
+
+RapidFire AI splits your dataset randomly into "chunks" and cycles LLM configurations through the GPUs at chunk boundaries. You get incremental signal on eval metrics across all configs much more quickly. The automatic checkpointing via an efficient shared-memory-based adapter/model spilling/loading mechanism keeps training smooth, stable, and consistent. Use IC Ops to adapt mid-flight to stop low-performers earlier and clone promising ones with tweaked config knobs, optionally warm-starting from the parent's weights.
+
+### Interactive Control Ops (IC Ops)
+
+IC Ops let you guide experiments mid-flight through the RapidFire AI dashboard. You can stop underperforming configurations after 1-2 chunks (instead of waiting for full training), clone promising configurations with modified hyperparameters (e.g., change learning rate or beta values), and optionally warm-start the cloned config from the parent's checkpoint. This enables rapid iteration: identify winners early, explore variations without starting from scratch, and avoid wasting GPU budget on configurations that show poor early signals.
 
 ## Getting Started
 
@@ -46,15 +65,15 @@ rapidfireai init
 rapidfireai start
 ```
 
-The dashboard will be available at `http://0.0.0.0:3000` where you can monitor and control experiments in real-time.
+The dashboard will be available at `http://localhost:3000` where you can monitor and control experiments in real-time.
 
-## GRPO in One Paragraph
+## Example: Running Multiple GRPO Configurations Concurrently
 
-GRPO (Group Relative Policy Optimization) optimizes LLM responses by generating multiple candidate completions per prompt, computing rewards for each, and using group-relative advantages to update the policy. Unlike DPO which requires preference pairs, GRPO uses a single prompt with multiple sampled responses and their scalar rewards. In practice, you define custom reward functions (e.g., correctness, format compliance, reasoning quality) that evaluate each generated response, and GRPO learns to maximize these rewards while staying close to a reference policy via KL regularization.
+Here's a complete example showing how RapidFire AI integrates with TRL's `GRPOTrainer` to run multiple GRPO configurations concurrently on a math reasoning task. The key difference from standard TRL usage is wrapping your configs with RapidFire's multi-config wrappers—everything else stays the same.
 
-## Minimal TRL GRPO Example
+We'll use the GSM8K dataset and train models to produce structured outputs with `<reasoning>` and `<answer>` tags.
 
-Here's a complete example showing how RapidFire AI integrates with TRL's `GRPOTrainer` to run multiple GRPO configurations concurrently on a math reasoning task. We'll use the GSM8K dataset and train models to produce structured outputs with `<reasoning>` and `<answer>` tags.
+**📓 Complete Tutorial**: The full notebook is available at [rf-tutorial-grpo-mathreasoning-lite.ipynb](https://github.com/RapidFireAI/rapidfireai/blob/main/tutorial_notebooks/post-training/rf-tutorial-grpo-mathreasoning-lite.ipynb).
 
 ### The Setup: Math Reasoning on GSM8K
 
@@ -64,8 +83,6 @@ Our objective is to improve mathematical reasoning by encouraging:
 - **Format compliance** through multiple complementary reward functions
 
 We'll compare two small models (Qwen2.5-0.5B-Instruct and Llama-3.2-1B-Instruct) with different learning rates, using a subset of GSM8K (128 train / 24 eval samples) for fast iteration.
-
-The full notebook is available at [rf-tutorial-grpo-mathreasoning-lite.ipynb](https://github.com/RapidFireAI/rapidfireai/blob/main/tutorial_notebooks/post-training/rf-tutorial-grpo-mathreasoning-lite.ipynb).
 
 #### 1. Import Libraries and Initialize Experiment
 
@@ -131,6 +148,7 @@ def sample_formatting_function(row):
 
 ```python
 def correctness_reward_func(prompts, completions, answer, **kwargs) -> list[float]:
+    """Reward for exact answer match (2.0 for correct, 0.0 otherwise)"""
     def extract_xml_answer(text: str) -> str:
         answer = text.split("<answer>")[-1]
         answer = answer.split("</answer>")[0]
@@ -140,15 +158,73 @@ def correctness_reward_func(prompts, completions, answer, **kwargs) -> list[floa
     extracted_responses = [extract_xml_answer(r) for r in responses]
     return [2.0 if r == a else 0.0 for r, a in zip(extracted_responses, answer)]
 
+def int_format_reward_func(completions, **kwargs) -> list[float]:
+    """Reward for answer being a valid integer (0.5 for valid, 0.0 otherwise)"""
+    def extract_xml_answer(text: str) -> str:
+        answer = text.split("<answer>")[-1]
+        answer = answer.split("</answer>")[0]
+        return answer.strip()
+    
+    responses = [completion[0]["content"] for completion in completions]
+    extracted_answers = [extract_xml_answer(r) for r in responses]
+    
+    def is_int(s: str) -> bool:
+        try:
+            int(s)
+            return True
+        except:
+            return False
+    
+    return [0.5 if is_int(a) else 0.0 for a in extracted_answers]
+
 def strict_format_reward_func(completions, **kwargs) -> list[float]:
+    """Reward for exact XML structure compliance (0.5 for exact match)"""
     import re
     pattern = r"^<reasoning>\n.*?\n</reasoning>\n<answer>\n.*?\n</answer>\n$"
     responses = [completion[0]["content"] for completion in completions]
-    matches = [re.match(pattern, r) for r in responses]
+    matches = [re.match(pattern, r, re.DOTALL) for r in responses]
     return [0.5 if match else 0.0 for match in matches]
 
+def soft_format_reward_func(completions, **kwargs) -> list[float]:
+    """Reward for loose XML structure compliance (0.5 for pattern match)"""
+    import re
+    responses = [completion[0]["content"] for completion in completions]
+    
+    def has_format(text: str) -> bool:
+        has_reasoning = "<reasoning>" in text and "</reasoning>" in text
+        has_answer = "<answer>" in text and "</answer>" in text
+        return has_reasoning and has_answer
+    
+    return [0.5 if has_format(r) else 0.0 for r in responses]
+
+def xml_count_reward_func(completions, **kwargs) -> list[float]:
+    """Fine-grained reward based on tag usage and cleanliness (up to 0.5)"""
+    responses = [completion[0]["content"] for completion in completions]
+    
+    def count_score(text: str) -> float:
+        score = 0.0
+        # Check for reasoning tags
+        if text.count("<reasoning>") == 1:
+            score += 0.125
+        if text.count("</reasoning>") == 1:
+            score += 0.125
+        # Check for answer tags
+        if text.count("<answer>") == 1:
+            score += 0.125
+        if text.count("</answer>") == 1:
+            score += 0.125
+        return score
+    
+    return [count_score(r) for r in responses]
+
 # Define your complete reward function set
-reward_funcs = [correctness_reward_func, strict_format_reward_func, ...]
+reward_funcs = [
+    correctness_reward_func, 
+    int_format_reward_func, 
+    strict_format_reward_func, 
+    soft_format_reward_func, 
+    xml_count_reward_func
+]
 ```
 
 #### 5. Configure GRPO Training with RapidFire AI Wrappers
@@ -256,8 +332,6 @@ experiment.run_fit(
 experiment.end()
 ```
 
-**That's it!** RapidFire AI now orchestrates concurrent training across multiple GRPO configurations on the same GPU(s), automatically managing model swaps, logging to MLflow, and enabling interactive control through the dashboard.
-
 ### What Happens During Execution
 
 When you run this example:
@@ -283,10 +357,7 @@ During training, RapidFire AI automatically tracks these critical GRPO metrics f
 | `objective/entropy` | Entropy of the policy model's output distribution |
 | `objective/episode_lengths` | Average length of generated completions |
 
-This delivers **16-24× higher throughput** compared to training each configuration sequentially, letting you find the best GRPO setup much faster.
-
-**📓 Complete Tutorial**: For a full end-to-end example with more realistic settings, see the [GRPO Math Reasoning Tutorial Notebook](https://github.com/RapidFireAI/rapidfireai/blob/main/tutorial_notebooks/post-training/rf-tutorial-grpo-mathreasoning-lite.ipynb)
-
+This delivers **16–24× higher throughput** compared to training each configuration sequentially, letting you find the best GRPO setup much faster.
 
 ## Benchmarks: Real-World Speedups
 
@@ -309,23 +380,23 @@ The speedup comes from three key factors:
 2. **Efficient GPU utilization**: While one model trains, others are being swapped in/out, minimizing idle time
 3. **Interactive Control (IC Ops)**: Stop underperforming configs after 1-2 chunks instead of waiting for full training
 
-The result: **You get signals 16-24× faster**, make decisions sooner, and spend GPU budget only on promising configurations.
+The result: **You get signals 16–24× faster**, make decisions sooner, and spend GPU budget only on promising configurations.
 
-## The Bottom Line
+## Conclusion
 
-GRPO is a powerful way to train LLMs for structured reasoning tasks—math problems, code generation, complex QA—but the difference between a great GRPO system and a merely adequate one is the speed and clarity of your experimentation loop. RapidFire AI's official TRL integration gives you that loop: multi-config orchestration, chunked advancement for early comparative signal, real-time control with IC Ops, and built-in visualization. The net effect is simple: more informed decisions, sooner, at lower cost.
+GRPO is an effective approach for training LLMs on structured reasoning tasks—math problems, code generation, complex QA—but the difference between a great GRPO system and a merely adequate one is the speed and clarity of your experimentation loop. RapidFire AI's official TRL integration provides: multi-config orchestration, chunked advancement for early comparative signal, real-time control with IC Ops, and built-in visualization. The net effect is simple: more informed decisions, sooner, at lower cost.
 
-If you're using TRL's `GRPOTrainer` for reasoning tasks, the integration is production-ready and waiting for you. It won't just make your GPU run faster—it will make your team learn faster.
+If you're using TRL's `GRPOTrainer` for reasoning tasks, the integration provides a way to efficiently explore multiple configurations in parallel, helping you find better GRPO settings with the same GPU budget.
 
-## Get Started Today
+### Get Started Today
 
-Ready to accelerate your GRPO experiments? The RapidFire AI integration with TRL is open source, production-ready, and easy to get started:
+Ready to accelerate your GRPO experiments? The RapidFire AI integration with TRL is open source and easy to get started:
 
 **🚀 Try it hands-on**: [Interactive Colab Notebook](http://tinyurl.com/rapidfireai-colab) — Zero setup, runs in your browser
 
 **📚 Full Documentation**: [oss-docs.rapidfire.ai](https://oss-docs.rapidfire.ai) — Complete guides, examples, and API reference
 
-**💻 GitHub**: [RapidFireAI/rapidfireai](https://github.com/RapidFireAI/rapidfireai) — Open source, production-ready
+**💻 GitHub**: [RapidFireAI/rapidfireai](https://github.com/RapidFireAI/rapidfireai) — Open source
 
 **📦 Install via PyPI**: [pypi.org/project/rapidfireai](https://pypi.org/project/rapidfireai) — `pip install rapidfireai`
 
