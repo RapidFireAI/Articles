@@ -35,7 +35,8 @@ RapidFire AI addresses these issues head-on with adaptive execution, multi-confi
 
 RapidFire AI splits your dataset randomly into "chunks" and cycles LLM configurations through the GPUs at chunk boundaries. You get incremental signal on eval metrics across all configs much more quickly. The automatic checkpointing via an efficient shared-memory-based adapter/model spilling/loading mechanism keeps training smooth, stable, and consistent. Use IC Ops to adapt mid-flight to stop low-performers earlier and clone promising ones with tweaked config knobs, optionally warm-starting from the parent's weights.
 
-![GPU Scheduling Comparison](https://raw.githubusercontent.com/RapidFireAI/hf-trl-integration-article/main/images/gantt-2gpu.png)
+<img src="https://raw.githubusercontent.com/RapidFireAI/hf-trl-integration-article/main/images/gantt-2gpu.png" alt="GPU Scheduling Comparison" style="width: 60%;">
+
 *Sequential vs. Task Parallel vs. RapidFire AI: The adaptive scheduler maximizes GPU utilization across multiple configs and GPUs. The bottom row shows IC Ops in action—stopping, cloning, and modifying runs mid-flight.*
 
 ## Getting Started
