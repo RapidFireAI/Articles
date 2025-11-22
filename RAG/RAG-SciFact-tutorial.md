@@ -62,7 +62,35 @@ You can find the complete code for this tutorial in the [RapidFireAI GitHub repo
 
 Let's break down what the notebook does step by step:
 
-### 1. Initialize the Experiment
+### 1. Load and Prepare the Dataset
+
+The SciFact dataset consists of:
+- **queries.jsonl**: Scientific claims to verify
+- **corpus.jsonl**: 5,000+ research abstracts (the knowledge base)
+- **qrels.tsv**: Ground truth relevance judgments
+
+The notebook loads these into a Hugging Face `Dataset` format and extracts the ground truth labels (SUPPORT/CONTRADICT/NOINFO) for evaluation:
+
+```python
+# Load queries and process labels
+data = []
+with open("datasets/scifact/queries.jsonl", "r") as f:
+    for line in f:
+        data.append(json.loads(line))
+# ... label processing logic ...
+
+# Create Hugging Face Dataset
+scifact_dataset = Dataset.from_dict({
+    "query": [d["text"] for d in data],
+    "query_id": [d["_id"] for d in data],
+    "label": [d["label"] for d in data],
+})
+
+# Load Ground Truth (Qrels)
+qrels = pd.read_csv("datasets/scifact/qrels.tsv", sep="\t")
+```
+
+### 2. Initialize the Experiment
 
 Every RapidFireAI evaluation starts by creating an `Experiment` object that tracks all configurations, runs, and results:
 
@@ -76,15 +104,6 @@ experiment = Experiment(
 ```
 
 This automatically sets up MLflow tracking and experiment logging.
-
-### 2. Load and Prepare the Dataset
-
-The SciFact dataset consists of:
-- **queries.jsonl**: Scientific claims to verify
-- **corpus.jsonl**: 5,000+ research abstracts (the knowledge base)
-- **qrels.tsv**: Ground truth relevance judgments
-
-The notebook loads these into a Hugging Face `Dataset` format and extracts the ground truth labels (SUPPORT/CONTRADICT/NOINFO) for evaluation.
 
 ### 3. Configure the RAG Pipeline
 
@@ -116,24 +135,44 @@ rag_config = RFLangChainRagSpec(
 
 ### 4. Define Data Processing & Metrics
 
-RapidFireAI lets you customize how data flows through your pipeline:
+RapidFireAI lets you customize how data flows through your pipeline using three callback functions:
 
-**Preprocessing** (`sample_preprocess_fn`): 
-- Retrieves context using the RAG pipeline
-- Constructs prompts combining the claim with retrieved evidence
-- Formats as messages for the LLM API
+```python
+def sample_preprocess_fn(batch, rag, prompt_manager):
+    # 1. Retrieve context
+    all_context = rag.get_context(batch_queries=batch["query"], serialize=False)
+    serialized_context = rag.serialize_documents(all_context)
+    
+    # 2. Construct prompts
+    return {
+        "prompts": [
+            [
+                {"role": "system", "content": INSTRUCTIONS},
+                {"role": "user", "content": f"Claim:\n{q}.\nEvidence:\n{c}.\nYour response:"}
+            ]
+            for q, c in zip(batch["query"], serialized_context)
+        ],
+        "retrieved_documents": [[d.metadata["corpus_id"] for d in docs] for docs in all_context],
+        **batch,
+    }
 
-**Postprocessing** (`sample_postprocess_fn`):
-- Extracts the verdict (SUPPORT/CONTRADICT/NOINFO) from LLM output using regex
-- Adds ground truth data for comparison
+def sample_postprocess_fn(batch):
+    # Extract verdict (SUPPORT/CONTRADICT) from LLM output using Regex
+    batch["answer"] = [extract_solution(ans) for ans in batch["generated_text"]]
+    return batch
 
-**Metrics** (`sample_compute_metrics_fn`):
-For scientific fact verification, we track:
-- **Retrieval Quality**: NDCG@5 and MRR measure how well relevant documents are ranked
-- **Generation Quality**: Precision, Recall, and F1 measure verdict accuracy
-- **Total Examples**: Track coverage and completion
+def sample_compute_metrics_fn(batch):
+    # Calculate NDCG, Precision, F1, etc.
+    return {
+        "Precision": {"value": precision_score(...)},
+        "NDCG@5": {"value": ndcg_score(...)},
+        # ... other metrics
+    }
+```
 
-These metrics are computed per batch and automatically aggregated across all shards.
+**Preprocessing** (`sample_preprocess_fn`): Retrieves context and formats the prompt.
+**Postprocessing** (`sample_postprocess_fn`): Extracts the structured verdict from the LLM's text response.
+**Metrics** (`sample_compute_metrics_fn`): Computes retrieval (NDCG) and generation (F1) scores per batch. These are automatically aggregated.
 
 ### 5. Define the Configuration Grid
 
