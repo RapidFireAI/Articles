@@ -58,7 +58,7 @@ The claim verification RAG pipeline we'll optimize has three key stages:
 
 ## Notebook Walkthrough
 
-Ready to optimize your own RAG pipeline? The complete notebook with full code is available in the [RapidFireAI GitHub repository](https://github.com/RapidFireAI/rapidfireai/blob/main/tutorial_notebooks/rag-contexteng/rf-tutorial-scifact-full-evaluation.ipynb).
+You can find the complete code for this tutorial in the [RapidFireAI GitHub repository](https://github.com/RapidFireAI/rapidfireai/blob/main/tutorial_notebooks/rag-contexteng/rf-tutorial-scifact-full-evaluation.ipynb). If you encounter any issues or need guidance while running it, join our [Discord community](https://discord.gg/6vSTtncKNN)—we're here to help!
 
 Let's break down what the notebook does step by step:
 
