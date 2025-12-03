@@ -7,16 +7,16 @@ This cookbook demonstrates how to fine-tune LLMs using **Supervised Fine-Tuning 
 **What You'll Learn:**
 
 - **Concurrent LLM Experimentation**: How to define and run multiple SFT experiments concurrently
-- **LoRA Fine-tuning**: Using Parameter-Efficient Fine-Tuning (PEFT) with different adapter capacities
+- **LoRA Fine-tuning**: Using Parameter-Efficient Fine-Tuning (PEFT) with LoRA adapters of different capacities
 - **Experiment Tracking**: Automatic MLflow-based logging and real-time dashboard monitoring
-- **Interactive Control**: Stopping underperformers and cloning promising runs mid-training
+- **Interactive Control Operations (IC Ops)**: Using Stop, Resume, Clone-Modify, and Delete to manage runs mid-training
 
 **Key Benefits of RapidFire AI:**
 
 - ⚡ **16-24× Speedup**: Compare multiple configurations in the time it takes to run one sequentially
 - 🎯 **Early Signals**: Get comparative metrics after the first data chunk instead of waiting for full training
 - 🔧 **Drop-in Integration**: Uses familiar TRL/Transformers APIs with minimal code changes
-- 📊 **Real-time Monitoring**: Live dashboard at `localhost:3000` with IC Ops controls
+- 📊 **Real-time Monitoring and Control**: Live dashboard with IC Ops (Stop, Resume, Clone-Modify, and Delete) on active runs
 
 **Hardware Requirements:**
 
@@ -31,7 +31,7 @@ This cookbook demonstrates how to fine-tune LLMs using **Supervised Fine-Tuning 
 When fine-tuning LLMs, you often need to compare multiple configurations:
 - Different LoRA ranks (r=8, r=16, r=32)
 - Various learning rates (1e-3, 1e-4, 5e-5)
-- Multiple target modules (attention only vs. attention + FFN)
+- Multiple target modules (attention only vs. attention + feed-forward network (FFN) layers)
 
 The traditional approach is painfully slow:
 1. Train config 1 → wait 30 minutes
@@ -39,7 +39,7 @@ The traditional approach is painfully slow:
 3. Train config 3 → wait 30 minutes
 4. Finally compare results after 90+ minutes
 
-**RapidFire AI transforms this** by training all configurations concurrently using chunk-based scheduling, giving you comparative signals in ~15 minutes instead of 90+.
+**RapidFire AI transforms this** by training all configurations concurrently using chunk-based scheduling—processing the dataset in chunks and letting every run train on each chunk before moving to the next—giving you comparative signals in ~15 minutes instead of 90+.
 
 ![RapidFire AI Architecture](https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/blog/rapidfireai_intro/rf-usage.png)
 *RapidFire AI establishes live three-way communication between your IDE, a metrics dashboard, and a multi-GPU execution backend*
@@ -314,7 +314,7 @@ def sample_create_model(model_config):
 
 ## Create the Config Group
 
-RapidFire AI uses `RFGridSearch` to generate a **config group**—a set of run configurations produced from all combinations of your knobs:
+RapidFire AI uses `RFGridSearch` to generate a **Config Group**—a set of configurations produced from all combinations of your knobs. Each configuration in the Config Group later becomes a separate run on the GPU:
 
 ```python
 # Create a config group using grid search
@@ -342,7 +342,7 @@ experiment.run_fit(
 )
 ```
 
-> **What is `num_chunks`?** RapidFire AI splits your dataset into chunks and trains all runs on each chunk before moving to the next. This enables early comparison—after chunk 1 completes, you can already see which runs are performing better, instead of waiting for full training. Use 4-8 chunks for most experiments.
+> **What is `num_chunks`?** RapidFire AI splits your dataset into chunks and trains all runs on each chunk before moving to the next; this training pattern is called **chunk-based scheduling**. This enables early comparison—after chunk 1 completes, you can already see which runs are performing better, instead of waiting for full training. Use 4-8 chunks for most experiments.
 
 ```
 🚀 Starting RapidFire AI training...
