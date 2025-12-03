@@ -219,92 +219,96 @@ peft_configs_lite = List([
 ### Define Model and Training Configurations
 
 ```python
-# Configuration 1: Higher learning rate (1e-3)
-config_1 = RFModelConfig(
-    model_name="TinyLlama/TinyLlama-1.1B-Chat-v1.0",
-    peft_config=peft_configs_lite,  # Will expand to 2 configs automatically!
-    training_args=RFSFTConfig(
-        learning_rate=1e-3,
-        lr_scheduler_type="linear",
-        per_device_train_batch_size=4,
-        per_device_eval_batch_size=4,
-        max_steps=128,
-        gradient_accumulation_steps=1,
-        logging_steps=2,
-        eval_strategy="steps",
-        eval_steps=4,
-        fp16=True,
+# 2 base models x 2 peft configs = 4 combinations in total
+config_set_lite = List([
+    RFModelConfig(
+        model_name="TinyLlama/TinyLlama-1.1B-Chat-v1.0",  # 1.1B model
+        peft_config=peft_configs_lite,
+        training_args=RFSFTConfig(
+            learning_rate=1e-3,  # Higher LR for very small model
+            lr_scheduler_type="linear",
+            per_device_train_batch_size=4,
+            per_device_eval_batch_size=4,
+            max_steps=128,
+            gradient_accumulation_steps=1,   # No accumulation needed
+            logging_steps=2,
+            eval_strategy="steps",
+            eval_steps=4,
+            fp16=True,
+        ),
+        model_type="causal_lm",
+        model_kwargs={"device_map": "auto", "torch_dtype": "auto", "use_cache": False},
+        formatting_func=sample_formatting_function,
+        compute_metrics=sample_compute_metrics,
+        generation_config={
+            "max_new_tokens": 256,
+            "temperature": 0.8,  # Higher temp for tiny model
+            "top_p": 0.9,
+            "top_k": 30,         # Reduced top_k
+            "repetition_penalty": 1.05,
+        }
     ),
-    model_type="causal_lm",
-    model_kwargs={"device_map": "auto", "torch_dtype": "auto", "use_cache": False},
-    formatting_func=sample_formatting_function,
-    compute_metrics=sample_compute_metrics,
-    generation_config={
-        "max_new_tokens": 256,
-        "temperature": 0.8,
-        "top_p": 0.9,
-        "top_k": 30,
-        "repetition_penalty": 1.05,
-    }
-)
-
-# Configuration 2: Lower learning rate (1e-4)
-config_2 = RFModelConfig(
-    model_name="TinyLlama/TinyLlama-1.1B-Chat-v1.0",
-    peft_config=peft_configs_lite,
-    training_args=RFSFTConfig(
-        learning_rate=1e-4,  # 10x lower learning rate
-        lr_scheduler_type="linear",
-        per_device_train_batch_size=4,
-        per_device_eval_batch_size=4,
-        max_steps=128,
-        gradient_accumulation_steps=1,
-        logging_steps=2,
-        eval_strategy="steps",
-        eval_steps=4,
-        fp16=True,
-    ),
-    model_type="causal_lm",
-    model_kwargs={"device_map": "auto", "torch_dtype": "auto", "use_cache": False},
-    formatting_func=sample_formatting_function,
-    compute_metrics=sample_compute_metrics,
-    generation_config={
-        "max_new_tokens": 256,
-        "temperature": 0.8,
-        "top_p": 0.9,
-        "top_k": 30,
-        "repetition_penalty": 1.05,
-    }
-)
-
-# Combine into a config set: 2 learning rates × 2 LoRA configs = 4 total
-config_set_lite = List([config_1, config_2])
+    RFModelConfig(
+        model_name="TinyLlama/TinyLlama-1.1B-Chat-v1.0",  # 1.1B model
+        peft_config=peft_configs_lite,
+        training_args=RFSFTConfig(
+            learning_rate=1e-4,  # Lower LR
+            lr_scheduler_type="linear",
+            per_device_train_batch_size=4,
+            per_device_eval_batch_size=4,
+            max_steps=128,
+            gradient_accumulation_steps=1,   # No accumulation needed
+            logging_steps=2,
+            eval_strategy="steps",
+            eval_steps=4,
+            fp16=True,
+        ),
+        model_type="causal_lm",
+        model_kwargs={"device_map": "auto", "torch_dtype": "auto", "use_cache": False},
+        formatting_func=sample_formatting_function,
+        compute_metrics=sample_compute_metrics,
+        generation_config={
+            "max_new_tokens": 256,
+            "temperature": 0.8,  # Higher temp for tiny model
+            "top_p": 0.9,
+            "top_k": 30,         # Reduced top_k
+            "repetition_penalty": 1.05,
+        }
+    )
+])
 ```
 
-**How Config Expansion Works**: When you pass a `List()` of LoRA configs to `peft_config`, RapidFire AI automatically creates one run for each combination. With 2 LoRA configs × 2 learning rate configs, this produces **4 concurrent runs**.
+**How Config Expansion Works**: When you pass a `List()` of LoRA configs to `peft_config`, RapidFire AI automatically creates one run for each combination. With 2 LoRA configs × 2 model configs (different learning rates), this produces **4 concurrent runs**.
 
 ---
 
 ## Define the Model Creation Function
 
-This function loads the model and tokenizer for each configuration:
+This function loads the model and tokenizer for each configuration. It handles different model types (`causal_lm`, `seq2seq_lm`, `masked_lm`) based on the `model_type` knob in your config:
 
 ```python
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, AutoModelForSeq2SeqLM, AutoModelForMaskedLM
 
-def sample_create_model(model_config):
-    """Create model and tokenizer for a given configuration.
-    
-    RapidFire AI calls this function for each run, passing the 
-    config dictionary with all knob values for that run.
-    """
+def sample_create_model(model_config): 
+    """Function to create model object for any given config; must return tuple of (model, tokenizer)"""
     model_name = model_config["model_name"]
+    model_type = model_config["model_type"]
     model_kwargs = model_config["model_kwargs"]
+
+    if model_type == "causal_lm":
+        model = AutoModelForCausalLM.from_pretrained(model_name, **model_kwargs)
+    elif model_type == "seq2seq_lm":
+        model = AutoModelForSeq2SeqLM.from_pretrained(model_name, **model_kwargs)
+    elif model_type == "masked_lm":
+        model = AutoModelForMaskedLM.from_pretrained(model_name, **model_kwargs)
+    elif model_type == "custom":
+        # Handle custom model loading logic, e.g., loading your own checkpoints
+        # model = ... 
+        pass
+    else:
+        # Default to causal LM
+        model = AutoModelForCausalLM.from_pretrained(model_name, **model_kwargs)
     
-    # Load the pre-trained model
-    model = AutoModelForCausalLM.from_pretrained(model_name, **model_kwargs)
-    
-    # Load the tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     
     return (model, tokenizer)
