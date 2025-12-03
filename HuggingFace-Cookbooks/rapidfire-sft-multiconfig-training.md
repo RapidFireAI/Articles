@@ -181,11 +181,20 @@ def sample_compute_metrics(eval_preds):
 
 ---
 
-## Configure Multiple Training Configurations
+## Define Multiple Configurations
 
 This is where RapidFire AI shines. We'll define **4 different configurations** to compare:
 - 2 LoRA configurations (small adapter vs. large adapter)
 - 2 learning rates (1e-3 vs. 1e-4)
+
+### Quick LoRA Primer
+
+**LoRA (Low-Rank Adaptation)** is a parameter-efficient fine-tuning technique that adds small trainable matrices to frozen model layers instead of updating all weights. Key parameters:
+
+- **`r` (rank)**: Dimensionality of the adapter matrices—higher values = more capacity but more memory
+- **`lora_alpha`**: Scaling factor for LoRA weights (typically 2× the rank)
+- **`target_modules`**: Which model layers to adapt (e.g., attention projections like `q_proj`, `v_proj`)
+- **`lora_dropout`**: Dropout rate for regularization
 
 ### Define LoRA Configurations
 
@@ -276,7 +285,7 @@ config_2 = RFModelConfig(
 config_set_lite = List([config_1, config_2])
 ```
 
-**The Magic**: Notice how `peft_config=peft_configs_lite` automatically expands each model config into 2 variations. Combined with our 2 learning rate configs, RapidFire AI will train **4 configurations concurrently**!
+**How Config Expansion Works**: When you pass a `List()` of LoRA configs to `peft_config`, RapidFire AI automatically creates one run for each combination. With 2 LoRA configs × 2 learning rate configs, this produces **4 concurrent runs**.
 
 ---
 
@@ -288,18 +297,18 @@ This function loads the model and tokenizer for each configuration:
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 def sample_create_model(model_config):
-    """Create model and tokenizer for a given configuration."""
+    """Create model and tokenizer for a given configuration.
+    
+    RapidFire AI calls this function for each run, passing the 
+    config dictionary with all knob values for that run.
+    """
     model_name = model_config["model_name"]
-    model_type = model_config["model_type"]
     model_kwargs = model_config["model_kwargs"]
     
-    # Load model based on type
-    if model_type == "causal_lm":
-        model = AutoModelForCausalLM.from_pretrained(model_name, **model_kwargs)
-    else:
-        model = AutoModelForCausalLM.from_pretrained(model_name, **model_kwargs)
+    # Load the pre-trained model
+    model = AutoModelForCausalLM.from_pretrained(model_name, **model_kwargs)
     
-    # Load tokenizer
+    # Load the tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     
     return (model, tokenizer)
@@ -307,12 +316,12 @@ def sample_create_model(model_config):
 
 ---
 
-## Create the Grid Search Configuration
+## Create the Config Group
 
-RapidFire AI uses `RFGridSearch` to orchestrate multi-config training:
+RapidFire AI uses `RFGridSearch` to generate a **config group**—a set of run configurations produced from all combinations of your knobs:
 
 ```python
-# Create grid search over all configurations
+# Create a config group using grid search
 config_group = RFGridSearch(
     configs=config_set_lite,
     trainer_type="SFT"  # Use SFT trainer
@@ -321,12 +330,12 @@ config_group = RFGridSearch(
 
 ---
 
-## Run Multi-Configuration Training
+## Run Concurrent Training
 
 Now execute the training with chunk-based scheduling:
 
 ```python
-# Launch concurrent training of all 4 configurations
+# Launch concurrent training of all 4 runs
 experiment.run_fit(
     config_group,
     sample_create_model,
@@ -337,22 +346,24 @@ experiment.run_fit(
 )
 ```
 
+> **What is `num_chunks`?** RapidFire AI splits your dataset into chunks and trains all runs on each chunk before moving to the next. This enables early comparison—after chunk 1 completes, you can already see which runs are performing better, instead of waiting for full training. Use 4-8 chunks for most experiments.
+
 ```
 🚀 Starting RapidFire AI training...
-📊 4 configurations detected
+📊 4 configurations detected → 4 runs created
 📦 Dataset split into 4 chunks
 
-[Chunk 1/4] Training all configs on samples 0-32...
-  Config 1 (r=8, lr=1e-3):  loss=2.45
-  Config 2 (r=32, lr=1e-3): loss=2.38
-  Config 3 (r=8, lr=1e-4):  loss=2.52
-  Config 4 (r=32, lr=1e-4): loss=2.49
+[Chunk 1/4] Training all runs on samples 0-32...
+  Run 1 (r=8, lr=1e-3):  loss=2.45
+  Run 2 (r=32, lr=1e-3): loss=2.38
+  Run 3 (r=8, lr=1e-4):  loss=2.52
+  Run 4 (r=32, lr=1e-4): loss=2.49
 
-[Chunk 2/4] Training all configs on samples 32-64...
-  Config 1: loss=1.89 ↓
-  Config 2: loss=1.72 ↓  ← Leading!
-  Config 3: loss=2.31 ↓
-  Config 4: loss=2.18 ↓
+[Chunk 2/4] Training all runs on samples 32-64...
+  Run 1: loss=1.89 ↓
+  Run 2: loss=1.72 ↓  ← Leading!
+  Run 3: loss=2.31 ↓
+  Run 4: loss=2.18 ↓
 
 ...
 
@@ -362,11 +373,11 @@ experiment.run_fit(
 
 ### What Happens During Execution
 
-1. **Config Expansion**: 4 configurations are created from the 2×2 grid
-2. **Chunk-based Scheduling**: Data is split into 4 chunks; all configs train on each chunk before moving to the next
+1. **Config Expansion**: 4 configurations expand into 4 runs (one run per configuration)
+2. **Chunk-based Scheduling**: Data is split into chunks; all runs train on each chunk before moving to the next
 3. **GPU Swapping**: Models efficiently swap in/out of GPU memory at chunk boundaries
 4. **Real-time Metrics**: View all training curves simultaneously in the dashboard
-5. **IC Ops Available**: Stop underperformers early, clone promising configs with tweaks
+5. **IC Ops Available**: Stop, Resume, Clone-Modify, or Delete any run mid-training
 
 ![GPU Scheduling Comparison](https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/blog/rapidfireai_intro/gantt-2gpu.png)
 *Sequential vs. Task Parallel vs. RapidFire AI: The adaptive scheduler maximizes GPU utilization across multiple configs and GPUs. The bottom row shows IC Ops in action—stopping, cloning, and modifying runs mid-flight.*
@@ -391,30 +402,30 @@ experiment.end()
 
 ## Analyzing Results
 
-After training, you can compare all configurations in the MLflow dashboard. Example results:
+After training, you can compare all runs in the MLflow dashboard. Example results:
 
-| Config | LoRA Rank | Learning Rate | Final Loss | ROUGE-L | BLEU |
-|--------|-----------|---------------|------------|---------|------|
+| Run | LoRA Rank | Learning Rate | Final Loss | ROUGE-L | BLEU |
+|-----|-----------|---------------|------------|---------|------|
 | 1 | 8 | 1e-3 | 1.42 | 0.65 | 0.28 |
 | 2 | 32 | 1e-3 | **1.21** | **0.72** | **0.34** |
 | 3 | 8 | 1e-4 | 1.89 | 0.58 | 0.22 |
 | 4 | 32 | 1e-4 | 1.67 | 0.63 | 0.27 |
 
-**Insight**: Config 2 (larger LoRA rank + higher learning rate) converges fastest and achieves the best metrics for this task.
+**Insight**: Run 2 (larger LoRA rank + higher learning rate) converges fastest and achieves the best metrics for this task.
 
 ---
 
 ## Interactive Control Operations (IC Ops)
 
-During training, you can use IC Ops from the dashboard to:
+During training, you can use IC Ops from the dashboard to dynamically control runs in flight. RapidFire AI supports 4 IC Ops:
 
-- **Stop**: Terminate underperforming configs early to save compute
-- **Clone**: Duplicate a promising config with modified hyperparameters
-- **Warm-Start**: Clone a config and continue training from its current weights
-- **Resume**: Restart a previously stopped config
+- **Stop**: Terminate underperforming runs early to save compute
+- **Resume**: Restart a previously stopped run
+- **Clone-Modify**: Duplicate a promising run with modified hyperparameters (optionally warm-start from the parent's weights)
+- **Delete**: Remove a run entirely from the experiment
 
 ![Interactive Control Operations](https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/blog/rapidfireai_intro/icop-clone.png)
-*Clone promising configurations with modified hyperparameters, optionally warm-starting from the parent's weights, all from the live dashboard*
+*Clone-Modify a promising run with modified hyperparameters, optionally warm-starting from the parent's weights, all from the live dashboard*
 
 This enables adaptive experimentation where you react to results in real-time instead of waiting for all training to complete.
 
@@ -426,12 +437,11 @@ Here's what you can expect when switching from sequential to RapidFire AI concur
 
 | Scenario | Sequential Time | RapidFire AI | Speedup |
 |----------|----------------|--------------|---------|
-| 4 configs, 1 GPU | 60 min | 4 min | **15×** |
-| 8 configs, 1 GPU | 120 min | 7.5 min | **16×** |
-| 4 configs, 2 GPUs | 30 min | 2 min | **15×** |
-| 8 configs, 4 GPUs | 30 min | 1.5 min | **20×** |
+| 4 configs, 1 GPU | 120 min | 7.5 min | **16×** |
+| 8 configs, 1 GPU | 240 min | 12 min | **20×** |
+| 4 configs, 2 GPUs | 60 min | 4 min | **15×** |
 
-*Benchmarks on NVIDIA A100 40GB with TinyLlama-1.1B*
+*Benchmarks on NVIDIA A100 40GB with TinyLlama-1.1B and Llama-3.2-1B models*
 
 ---
 
@@ -439,12 +449,12 @@ Here's what you can expect when switching from sequential to RapidFire AI concur
 
 This cookbook demonstrated how RapidFire AI transforms SFT experimentation from a slow, sequential process into fast, parallel exploration:
 
-1. **Define Multiple Configs**: Use `List()` wrappers to create configuration variations
-2. **Run Concurrently**: `RFGridSearch` orchestrates all configs with chunk-based scheduling
+1. **Define a Config Group**: Use `List()` wrappers to specify multiple configurations
+2. **Run Concurrently**: `RFGridSearch` orchestrates all runs with chunk-based scheduling
 3. **Monitor Live**: Real-time dashboard shows all training curves simultaneously
-4. **Adapt Mid-Flight**: IC Ops let you stop losers and clone winners
+4. **Adapt Mid-Flight**: IC Ops let you stop underperforming runs and clone-modify promising ones
 
-**The Result**: You can compare 4-8 configurations in the time it previously took to run just one, enabling you to find better models faster and more efficiently.
+**The Result**: You can compare 4-8 runs in the time it previously took to train just one, enabling you to find better models faster and more efficiently.
 
 ---
 
