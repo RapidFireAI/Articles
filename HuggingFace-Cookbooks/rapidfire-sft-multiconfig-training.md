@@ -4,10 +4,6 @@ _Authored by: [RapidFire AI Team](https://github.com/RapidFireAI)_
 
 This cookbook demonstrates how to fine-tune LLMs using **Supervised Fine-Tuning (SFT)** with [RapidFire AI](https://github.com/RapidFireAI/rapidfireai), enabling you to train and compare multiple configurations concurrently—even on a single GPU. We'll build a customer support chatbot using the [Bitext Customer Support dataset](https://huggingface.co/datasets/bitext/Bitext-customer-support-llm-chatbot-training-dataset) and explore how RapidFire AI's chunk-based scheduling delivers **16-24× faster experimentation throughput**.
 
-<a target="_blank" href="https://colab.research.google.com/github/RapidFireAI/rapidfireai/blob/main/tutorial_notebooks/fine-tuning/rf-tutorial-sft-chatqa-lite.ipynb">
-  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
-</a>
-
 **What You'll Learn:**
 
 - **Concurrent LLM Experimentation**: How to define and run multiple SFT experiments concurrently
@@ -15,7 +11,7 @@ This cookbook demonstrates how to fine-tune LLMs using **Supervised Fine-Tuning 
 - **Experiment Tracking**: Automatic MLflow-based logging and real-time dashboard monitoring
 - **Interactive Control**: Stopping underperformers and cloning promising runs mid-training
 
-**Key Benefits:**
+**Key Benefits of RapidFire AI:**
 
 - ⚡ **16-24× Speedup**: Compare multiple configurations in the time it takes to run one sequentially
 - 🎯 **Early Signals**: Get comparative metrics after the first data chunk instead of waiting for full training
@@ -27,12 +23,6 @@ This cookbook demonstrates how to fine-tune LLMs using **Supervised Fine-Tuning 
 - **GPU**: 8GB+ VRAM (16GB+ recommended for larger models)
 - **RAM**: 16GB+ system memory
 - **Storage**: 10GB+ free space for models and checkpoints
-
-**Software Dependencies:**
-
-```bash
-pip install rapidfireai datasets transformers peft trl evaluate
-```
 
 ---
 
@@ -57,6 +47,12 @@ The traditional approach is painfully slow:
 ---
 
 ## Installation and Setup
+
+> 💡 **Try RapidFire AI instantly in your browser with our pre-configured Google Colab notebook. No installation required.**
+>
+> <a target="_blank" href="https://colab.research.google.com/github/RapidFireAI/rapidfireai/blob/main/tutorial_notebooks/fine-tuning/rf-tutorial-sft-chatqa-lite.ipynb">
+>   <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+> </a>
 
 First, install RapidFire AI and authenticate with Hugging Face:
 
