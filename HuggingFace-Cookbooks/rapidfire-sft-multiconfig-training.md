@@ -1,8 +1,8 @@
-# Multi-Configuration SFT Training with RapidFire AI
+# 20x Faster TRL Fine-tuning with RapidFire AI
 
 _Authored by: [RapidFire AI Team](https://github.com/RapidFireAI)_
 
-This cookbook demonstrates how to fine-tune language models using **Supervised Fine-Tuning (SFT)** with [RapidFire AI](https://github.com/RapidFireAI/rapidfireai), enabling you to train and compare multiple configurations concurrently—even on a single GPU. We'll build a customer support chatbot using the [Bitext Customer Support dataset](https://huggingface.co/datasets/bitext/Bitext-customer-support-llm-chatbot-training-dataset) and explore how RapidFire AI's chunk-based scheduling delivers **16-24× faster experimentation throughput**.
+This cookbook demonstrates how to fine-tune LLMs using **Supervised Fine-Tuning (SFT)** with [RapidFire AI](https://github.com/RapidFireAI/rapidfireai), enabling you to train and compare multiple configurations concurrently—even on a single GPU. We'll build a customer support chatbot using the [Bitext Customer Support dataset](https://huggingface.co/datasets/bitext/Bitext-customer-support-llm-chatbot-training-dataset) and explore how RapidFire AI's chunk-based scheduling delivers **16-24× faster experimentation throughput**.
 
 <a target="_blank" href="https://colab.research.google.com/github/RapidFireAI/rapidfireai/blob/main/tutorial_notebooks/fine-tuning/rf-tutorial-sft-chatqa-lite.ipynb">
   <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
@@ -10,7 +10,7 @@ This cookbook demonstrates how to fine-tune language models using **Supervised F
 
 **What You'll Learn:**
 
-- **Multi-Config Training**: How to define and run multiple SFT configurations concurrently
+- **Concurrent LLM Experimentation**: How to define and run multiple SFT experiments concurrently
 - **LoRA Fine-tuning**: Using Parameter-Efficient Fine-Tuning (PEFT) with different adapter capacities
 - **Experiment Tracking**: Automatic MLflow-based logging and real-time dashboard monitoring
 - **Interactive Control**: Stopping underperformers and cloning promising runs mid-training
