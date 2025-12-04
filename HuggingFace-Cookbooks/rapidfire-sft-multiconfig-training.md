@@ -48,11 +48,15 @@ The figure below illustrates this concept with 3 configurations (M1, M2, M3). Se
 
 ## Installation and Setup
 
-> 💡 **Try RapidFire AI instantly in your browser with our pre-configured Google Colab notebook. No installation required.**
+### Option 1: Run in Google Colab
+
+> 💡 **Try RapidFire AI instantly in your browser with our adapted Google Colab notebook version of this tutorial. It is configured to run end-to-end in Colab with no local installation required.**
 >
 > <a target="_blank" href="https://colab.research.google.com/github/RapidFireAI/rapidfireai/blob/main/tutorial_notebooks/fine-tuning/rf-tutorial-sft-chatqa-lite.ipynb">
 >   <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
 > </a>
+
+### Option 2: Run Locally
 
 First, install RapidFire AI and authenticate with Hugging Face:
 
@@ -84,7 +88,7 @@ The dashboard will be available at `http://localhost:3000` where you can monitor
 
 ## Load and Prepare the Dataset
 
-We'll use the Bitext Customer Support dataset, which contains instruction-response pairs for training customer support chatbots:
+We'll use the Bitext Customer Support dataset, which contains instruction-response pairs for training customer support chatbots. The full, runnable version of this code is also available in the RapidFire AI tutorial notebook (provided that you've installed RapidFire AI locally) [`rf-tutorial-sft-chatqa-lite.ipynb`](https://github.com/RapidFireAI/rapidfireai/blob/main/tutorial_notebooks/rf-tutorial-sft-chatqa-lite.ipynb).
 
 ```python
 from datasets import load_dataset
