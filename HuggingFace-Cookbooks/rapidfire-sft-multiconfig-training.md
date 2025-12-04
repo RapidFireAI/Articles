@@ -26,23 +26,27 @@ This cookbook demonstrates how to fine-tune LLMs using **Supervised Fine-Tuning 
 
 ---
 
-## The Problem: Fine-Tuning Is a Slow, Sequential Process
+## What We're Building
 
-When fine-tuning LLMs, you often need to compare multiple configurations:
-- Different LoRA ranks (r=8, r=16, r=32)
-- Various learning rates (1e-3, 1e-4, 5e-5)
-- Multiple target modules (attention only vs. attention + feed-forward network (FFN) layers)
+In this tutorial, we'll fine-tune a **customer support chatbot** that can answer user queries in a helpful and friendly manner.
 
-The traditional approach is painfully slow:
-1. Train config 1 → wait 30 minutes
-2. Train config 2 → wait 30 minutes
-3. Train config 3 → wait 30 minutes
-4. Finally compare results after 90+ minutes
+### The Dataset
 
-**RapidFire AI transforms this** by training all configurations concurrently using chunk-based scheduling—processing the dataset in chunks and letting every run train on each chunk before moving to the next—giving you comparative signals in ~15 minutes instead of 90+.
+We'll use the [Bitext Customer Support dataset](https://huggingface.co/datasets/bitext/Bitext-customer-support-llm-chatbot-training-dataset), which contains instruction-response pairs covering common customer support scenarios. Each example includes a user question and an ideal assistant response.
 
-![RapidFire AI Architecture](https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/blog/rapidfireai_intro/rf-usage.png)
-*RapidFire AI establishes live three-way communication between your IDE, a metrics dashboard, and a multi-GPU execution backend*
+### Our Approach
+
+We'll use **Supervised Fine-Tuning (SFT)** with **LoRA (Low-Rank Adaptation)** to efficiently adapt a pre-trained LLM (TinyLlama-1.1B) for customer support tasks. To find the best hyperparameters, we'll compare **4 configurations** simultaneously:
+
+- **2 LoRA adapter sizes**: Small (rank 8) vs. Large (rank 32)
+- **2 learning rates**: 1e-3 vs. 1e-4
+
+RapidFire AI's chunk-based scheduling trains all configurations concurrently—processing the dataset in chunks and letting every run train on each chunk before moving to the next. This gives you comparative metrics early, so you can identify the best configuration without waiting for all training to complete.
+
+The figure below illustrates this concept with 3 configurations (M1, M2, M3). Sequential training completes one configuration entirely before starting the next. RapidFire AI interleaves all configurations, training each on one data chunk before rotating to the next. The bottom row shows how IC Ops let you adapt mid-training—stopping underperformers and cloning promising runs. Our tutorial uses 4 configurations, but the scheduling principle is the same.
+
+![GPU Scheduling Comparison](./gantt-1gpu.png)
+*Sequential vs. RapidFire AI on a single GPU with chunk-based scheduling and IC Ops.*
 
 ---
 
@@ -76,6 +80,9 @@ rapidfireai start
 ```
 
 The dashboard will be available at `http://localhost:3000` where you can monitor experiments in real-time.
+
+![RapidFire AI Architecture](https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/blog/rapidfireai_intro/rf-usage.png)
+*RapidFire AI establishes live three-way communication between your IDE, a metrics dashboard, and a multi-GPU execution backend*
 
 ---
 
@@ -378,9 +385,6 @@ experiment.run_fit(
 3. **GPU Swapping**: Models efficiently swap in/out of GPU memory at chunk boundaries
 4. **Real-time Metrics**: View all training curves simultaneously in the dashboard
 5. **IC Ops Available**: Stop, Resume, Clone-Modify, or Delete any run mid-training
-
-![GPU Scheduling Comparison](https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/blog/rapidfireai_intro/gantt-2gpu.png)
-*Sequential vs. Task Parallel vs. RapidFire AI: The adaptive scheduler maximizes GPU utilization across multiple configs and GPUs. The bottom row shows IC Ops in action—stopping, cloning, and modifying runs mid-flight.*
 
 ---
 
