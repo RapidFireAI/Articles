@@ -2,7 +2,7 @@
 
 _Authored by: [RapidFire AI Team](https://github.com/RapidFireAI)_
 
-This cookbook demonstrates how to fine-tune LLMs using **Supervised Fine-Tuning (SFT)** with [RapidFire AI](https://github.com/RapidFireAI/rapidfireai), enabling you to train and compare multiple configurations concurrently—even on a single GPU. We'll build a customer support chatbot using the [Bitext Customer Support dataset](https://huggingface.co/datasets/bitext/Bitext-customer-support-llm-chatbot-training-dataset) and explore how RapidFire AI's chunk-based scheduling delivers **16-24× faster experimentation throughput**.
+This cookbook demonstrates how to fine-tune LLMs using **Supervised Fine-Tuning (SFT)** with [RapidFire AI](https://github.com/RapidFireAI/rapidfireai), enabling you to train and compare multiple configurations concurrently—even on a single GPU. We'll build a customer support chatbot and explore how RapidFire AI's chunk-based scheduling delivers **16-24× faster experimentation throughput**.
 
 **What You'll Learn:**
 
@@ -28,11 +28,7 @@ This cookbook demonstrates how to fine-tune LLMs using **Supervised Fine-Tuning 
 
 ## What We're Building
 
-In this tutorial, we'll fine-tune a **customer support chatbot** that can answer user queries in a helpful and friendly manner.
-
-### The Dataset
-
-We'll use the [Bitext Customer Support dataset](https://huggingface.co/datasets/bitext/Bitext-customer-support-llm-chatbot-training-dataset), which contains instruction-response pairs covering common customer support scenarios. Each example includes a user question and an ideal assistant response.
+In this tutorial, we'll fine-tune a **customer support chatbot** that can answer user queries in a helpful and friendly manner. We'll use the [Bitext Customer Support dataset](https://huggingface.co/datasets/bitext/Bitext-customer-support-llm-chatbot-training-dataset), which contains instruction-response pairs covering common customer support scenarios—each example includes a user question and an ideal assistant response.
 
 ### Our Approach
 
