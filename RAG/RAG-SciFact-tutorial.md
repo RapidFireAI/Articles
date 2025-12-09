@@ -4,7 +4,7 @@ Retrieval-Augmented Generation (RAG) systems are powerful, but optimizing them f
 
 In this tutorial, we'll walk through a complete example of using **[RapidFireAI](https://github.com/RapidFireAI/rapidfireai)** to systematically evaluate and optimize a RAG pipeline. We'll use the **SciFact** dataset—a benchmark for verifying scientific claims—to demonstrate how to compare multiple configurations in parallel and identify the best setup for high-precision tasks.
 
-## The Application: Scientific Fact Verification
+## The Application: Scientific Claim Verification
 
 In this tutorial, we'll optimize a RAG pipeline for **scientific claim verification**—a specialized fact-checking system for scientific literature. Unlike conversational AI chatbots that generate free-form responses, this system acts as an automated research assistant that assesses the validity of scientific statements with high precision and explainability.
 
