@@ -4,7 +4,7 @@
 
 Large language model (LLM) development increasingly depends on fast, systematic experimentation across retrieval, training, and evaluation choices. Yet many teams still rely on workflows where experiments are run one at a time and evaluation tools only surface results after the fact.
 
-Today, we’re excited to share a new integration between Trackio and RapidFire AI that changes this dynamic. With this integration, Trackio evolves from a passive evaluation and observability layer into an interactive experimentation interface. AI engineers can now define, launch, and compare multiple RAG and fine-tuning configurations in parallel—while directly analyzing tradeoffs across accuracy, latency, and cost.
+Today, we’re excited to share a new integration between Trackio and RapidFire AI that changes this dynamic. With this integration, Trackio provides a lightweight, real-time visualization layer for your experiments. AI engineers can now define, launch, and compare multiple RAG and fine-tuning configurations in parallel—while directly analyzing tradeoffs across accuracy, latency, and cost.
 
 This post is co-authored by Hugging Face contributors and the RapidFire AI team, and reflects a shared goal: making LLM experimentation more systematic, reproducible, and aligned with how models are actually built and deployed.
 
@@ -21,19 +21,15 @@ As a result:
 
 As LLM systems grow more complex—especially with RAG and post-training workflows—this approach becomes increasingly limiting.
 
-## **Trackio as an Interactive Experimentation Interface**
+## **Trackio for Real-Time Experiment Visualization**
 
-With the Trackio–RapidFire AI integration, Trackio moves upstream in the LLM development workflow. Instead of serving only as a destination for completed runs, Trackio becomes the interface where engineers actively define and explore experiments.
+With the Trackio–RapidFire AI integration, Trackio provides a free, open-source and lightweight dashboard for visualizing your experiments as they run. Instead of waiting for experiments to complete, engineers can monitor progress in real-time.
 
-From Trackio, users can:
+From Trackio's dashboard, users can:
 
 * View multiple RAG or fine-tuning configurations simultaneously  
-* Stop low performing configurations directly  
-* Clone high performing configurations and modify parameters to further improve outcomes
-
-This represents a shift from a results-only mindset to an experimentation-first workflow, where engineers explore a space of possibilities rather than iterating one change at a time.
-
-\<Insert Trackio Screenshots showing interactive controls with stopping and cloning examples\>
+* Compare metrics side-by-side across all parallel runs  
+* Track training loss, evaluation metrics, and hyperparameters in real-time
 
 ## **RapidFire AI: Executing Experiments at Scale**
 
@@ -67,8 +63,6 @@ RapidFire AI is an experiment execution framework for LLM fine-tuning and post-t
 
 Results can be compared side by side across retrieval metrics, task accuracy, latency, and inference cost—making tradeoffs immediately visible.
 
-\<Screenshot showing interactive update of components. \>
-
 **Fine-Tuning and Post-Training:** For fine-tuning workflows, the integration supports parallel sweeps across:
 
 * LoRA rank and adapter settings  
@@ -77,13 +71,15 @@ Results can be compared side by side across retrieval metrics, task accuracy, la
 
 Each resulting model is evaluated using consistent metrics, enabling clear and reproducible comparisons.
 
-\<Screenshot showing interactive update of components. \>
+![Trackio dashboard showing RapidFire AI fine-tuning metrics](./trackio-screenshot-sft.png)
+
+*Trackio dashboard comparing 4 fine-tuning runs with different hyperparameters. The plots show training loss, validation loss, learning rate schedules, and ROUGE-L scores—making it easy to identify which configuration (Run 4, in orange) achieves the lowest loss and best generation quality.*
 
 ## **Multi-Objective Optimization in Practice**
 
 Production LLM systems are inherently multi-objective. Accuracy improvements that dramatically increase latency or cost are often unacceptable, while lower-cost configurations may fail quality thresholds.
 
-By combining Trackio’s interface with RapidFire AI’s parallel execution, teams can visualize and reason about these tradeoffs directly. This enables informed engineering decisions based on real data rather than intuition or trial-and-error.
+By combining Trackio’s interface with RapidFire AI’s parallel execution, teams can monitor and reason about these tradeoffs directly. This enables informed engineering decisions based on real data rather than intuition or trial-and-error.
 
 ## **Why This Matters for LLM Teams**
 
@@ -95,11 +91,13 @@ By aligning experimentation tools with real-world workflows, Trackio and RapidFi
 
 Ready to try the integration? Here's how to get started:
 
-**1. Install both packages:**
+**1. Install RapidFire AI:**
 
 ```bash
-pip install rapidfireai trackio
+pip install rapidfireai
 ```
+
+Trackio is included as a dependency of RapidFire AI, so no separate installation is needed.
 
 **2. Try the tutorial notebooks:**
 
