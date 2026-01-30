@@ -6,24 +6,18 @@ Large language model (LLM) development increasingly depends on fast, systematic 
 
 Today, we’re excited to share a new integration between Trackio and RapidFire AI that changes this dynamic. With this integration, Trackio provides a lightweight, real-time visualization layer for your experiments. AI engineers can now define, launch, and compare multiple RAG and fine-tuning configurations in parallel—while directly analyzing tradeoffs across accuracy, latency, and cost.
 
-This post is co-authored by Hugging Face contributors and the RapidFire AI team, and reflects a shared goal: making LLM experimentation more systematic, reproducible, and aligned with how models are actually built and deployed.
-
-## **The Problem with Today’s LLM Experimentation Workflows**
-
-Most LLM experimentation today is still fragmented and sequential. Engineers typically modify one parameter at a time, rerun pipelines, and then inspect results after the fact. Evaluation tools surface metrics, but they sit downstream of the actual experimentation logic.
-
-As a result:
-
-* Experimentation cycles are slow and manual  
-* Difficulty comparing configurations consistently  
-* Fragmented experimentation logic spread across scripts and notebooks  
-* Optimization efforts that focus on one metric at a time
-
-As LLM systems grow more complex—especially with RAG and post-training workflows—this approach becomes increasingly limiting.
+This integration showcases that Trackio works great not only for fine-tuning but also for RAG pipeline optimization, where you can track retrieval metrics like Precision, Recall, NDCG, and MRR in real-time. Whether you're tuning LoRA adapters or comparing chunking strategies in RAG, RapidFire AI and Trackio have you covered.
 
 ## **Trackio for Real-Time Experiment Visualization**
 
-With the Trackio–RapidFire AI integration, Trackio provides a free, open-source and lightweight dashboard for visualizing your experiments as they run. Instead of waiting for experiments to complete, engineers can monitor progress in real-time.
+With the Trackio–RapidFire AI integration, Trackio provides a free, open-source dashboard for visualizing your experiments as they run. Instead of waiting for experiments to complete, engineers can monitor progress in real-time.
+
+**Why Trackio?**
+
+* **Free and open-source**: No usage limits, no pricing tiers—experiment tracking accessible to everyone
+* **Local-first design**: Dashboard runs locally with no server setup required; data persists in a lightweight SQLite database
+* **Lightweight**: The core codebase is less than 5,000 lines of Python, making it easy to understand and extend
+* **Works in Google Colab**: Trackio runs seamlessly in Colab notebooks, perfect for quick experimentation without local installation
 
 From Trackio's dashboard, users can:
 
@@ -45,7 +39,7 @@ This integration enables Trackio to focus on insight and comparison while RapidF
 
 ## **How RapidFire AI Integrates with Trackio**
 
-RapidFire AI is an experiment execution framework for LLM fine-tuning and post-training that enables hyper-parallel training across multiple configurations. This is where Trackio becomes invaluable. RapidFire AI has built native Trackio support into its metric logging system:
+RapidFire AI is an experiment execution framework for LLM fine-tuning and post-training that enables hyper-parallel training across multiple configurations. This is where Trackio becomes invaluable. RapidFire AI has integrated native Trackio support into its metric logging system:
 
 * Automatic Metric Capture: Training metrics (loss, learning rate, gradient norms) are automatically logged to Trackio during training  
 * Evaluation Metrics: Custom evaluation metrics (ROUGE, BLEU, accuracy) are captured at each evaluation step  
@@ -54,7 +48,9 @@ RapidFire AI is an experiment execution framework for LLM fine-tuning and post-t
 
 ## **Practical Workflows Enabled by the Integration**
 
-**RAG Experimentation**: Engineers can explore multiple RAG configurations in parallel, including variations in:
+### RAG Experimentation
+
+This integration marks the first use of Trackio for RAG pipeline optimization. Engineers can explore multiple RAG configurations in parallel, including variations in:
 
 * Chunk size  
 * Embedding models  
@@ -63,7 +59,13 @@ RapidFire AI is an experiment execution framework for LLM fine-tuning and post-t
 
 Results can be compared side by side across retrieval metrics, task accuracy, latency, and inference cost—making tradeoffs immediately visible.
 
-**Fine-Tuning and Post-Training:** For fine-tuning workflows, the integration supports parallel sweeps across:
+![Trackio dashboard showing RapidFire AI RAG metrics](./rapidfire-trackio-rag-screenshot.png)
+
+*Trackio dashboard comparing 4 RAG pipeline configurations on retrieval metrics (F1 Score, NDCG@5, MRR, Recall) across different chunk sizes and reranking parameters.*
+
+### Fine-Tuning and Post-Training
+
+For fine-tuning workflows, the integration supports parallel sweeps across:
 
 * LoRA rank and adapter settings  
 * Learning rates and training schedules  
@@ -123,7 +125,7 @@ We've created hands-on tutorials that walk through complete experiments with Tra
 
 ## **Conclusion**
 
-By integrating Trackio and RapidFire AI, we've combined hyper-parallel experiment execution with free, open-source experiment tracking. ML engineers can now run many configurations simultaneously while maintaining full visibility into every run's progress.
+By integrating Trackio and RapidFire AI, we've combined hyper-parallel experiment execution with free, open-source experiment tracking. This integration not only brings Trackio to RapidFire AI users but also demonstrates Trackio's versatility by applying it to RAG experimentation—a first for the library. ML engineers can now run many fine-tuning and RAG configurations simultaneously while maintaining full visibility into every run's progress.
 
 We believe experiment tracking should be accessible to everyone—not locked behind pricing tiers or requiring complex infrastructure. Trackio embodies this philosophy, and we're excited to bring it to the RapidFire AI community.
 
