@@ -27,19 +27,19 @@ From Trackio's dashboard, users can:
 
 ## **RapidFire AI: Executing Experiments at Scale**
 
-RapidFire AI provides the execution layer that makes interactive experimentation possible. Once experiment configurations are defined, RapidFire AI orchestrates their execution in parallel, ensuring that results are both reproducible and directly comparable.
+[RapidFire AI](https://github.com/RapidFireAI/rapidfireai) enables rapid experimentation for easier, faster, and more impactful AI customization. Built for agentic RAG, context engineering, fine-tuning, and post-training of LLMs and other deep learning models, it delivers 16-24x higher throughput without extra resources.
 
-This includes:
+Key capabilities include:
 
 * Hyper-parallel execution of RAG and fine-tuning experiments  
 * Automated handling of experiment variants and parameters  
 * Structured result collection aligned with evaluation metrics
 
-This integration enables Trackio to focus on insight and comparison while RapidFire AI handles scale, speed, and experimental rigor.
+Together, Trackio handles visualization and comparison while RapidFire AI handles scale, speed, and experimental rigor.
 
 ## **How RapidFire AI Integrates with Trackio**
 
-RapidFire AI is an experiment execution framework for LLM fine-tuning and post-training that enables hyper-parallel training across multiple configurations. This is where Trackio becomes invaluable. RapidFire AI has integrated native Trackio support into its metric logging system:
+When running experiments with RapidFire AI, you often have many configurations executing simultaneously. This is where Trackio becomes invaluable. RapidFire AI has integrated native Trackio support into its metric logging system:
 
 * Automatic Metric Capture: Training metrics (loss, learning rate, gradient norms) are automatically logged to Trackio during training  
 * Evaluation Metrics: Custom evaluation metrics (ROUGE, BLEU, accuracy) are captured at each evaluation step  
