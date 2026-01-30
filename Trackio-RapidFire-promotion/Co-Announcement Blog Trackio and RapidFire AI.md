@@ -91,22 +91,33 @@ For individual engineers, the integration shortens feedback loops and reduces re
 
 By aligning experimentation tools with real-world workflows, Trackio and RapidFire AI aim to make rigorous LLM development more accessible to the community.
 
-**Get Started**
+## **Get Started**
 
 Ready to try the integration? Here's how to get started:
 
-Install both packages:
+**1. Install both packages:**
 
+```bash
 pip install rapidfireai trackio
+```
 
-Try the tutorial notebook:
+**2. Try the tutorial notebooks:**
 
-We've created a hands-on tutorial that walks through a complete fine-tuning experiment with Trackio tracking. The notebook demonstrates configuring Trackio, running parallel experiments, and viewing results in the dashboard.
+We've created hands-on tutorials that walk through complete experiments with Trackio tracking. Each tutorial demonstrates configuring Trackio, running parallel experiments, and viewing results in the dashboard.
 
-👉 [RapidFire AI \+ Trackio Tutorial Notebook](https://github.com/RapidFireAI/rapidfireai/blob/main/tutorial_notebooks/fine-tuning/rf-tutorial-sft-trackio.ipynb)
+**Fine-Tuning (SFT) Tutorials:**
 
-Learn more:
+* [SFT with Trackio \- Colab Version](https://github.com/RapidFireAI/rapidfireai/blob/main/tutorial_notebooks/fine-tuning/trackio/rf-colab-tutorial-sft-trackio.ipynb) \- Run directly in Google Colab, no local installation required
+* [SFT with Trackio \- Local Version](https://github.com/RapidFireAI/rapidfireai/blob/main/tutorial_notebooks/fine-tuning/trackio/rf-tutorial-sft-trackio.ipynb) \- For local development with full RapidFire AI features
 
+**RAG Optimization Tutorials:**
+
+* [RAG FiQA with Trackio \- Colab Version](https://github.com/RapidFireAI/rapidfireai/blob/main/tutorial_notebooks/rag-contexteng/trackio/rf-colab-tutorial-rag-fiqa-trackio.ipynb) \- Run directly in Google Colab, no local installation required
+* [RAG FiQA with Trackio \- Local Version](https://github.com/RapidFireAI/rapidfireai/blob/main/tutorial_notebooks/rag-contexteng/trackio/rf-tutorial-rag-fiqa-trackio.ipynb) \- For local development with full RapidFire AI features
+
+**3. Learn more:**
+
+* [RapidFire AI Integration Guide](https://github.com/gradio-app/trackio/blob/main/docs/source/rapidfireai_integration.md) \- Official integration documentation with setup instructions and examples
 * [Trackio GitHub Repository](https://github.com/gradio-app/trackio) \- Full documentation and examples  
 * [Trackio Documentation](https://huggingface.co/docs/trackio/index) \- API reference and guides  
 * [RapidFire AI Documentation](https://oss-docs.rapidfire.ai/) \- Getting started with RapidFire AI  
@@ -119,7 +130,3 @@ By integrating Trackio and RapidFire AI, we've combined hyper-parallel experimen
 We believe experiment tracking should be accessible to everyone—not locked behind pricing tiers or requiring complex infrastructure. Trackio embodies this philosophy, and we're excited to bring it to the RapidFire AI community.
 
 We invite you to try the integration, share feedback, and help shape the future of LLM experimentation tooling.
-
-## 
-
-[image1]: <data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAlCAYAAAAqXEs9AAABm0lEQVR4Xu2XPUsDQRRF8ye0EYUYhYiRLEQ0ulnFGNDE2NiJjZVY2WllJzZ2YmPrLx29K88s895mPnaGREhx0Exucg+XNWtqSysNNU/U9INZsxAy8X+E1hottZ+dqZ3dntrY7qh6MwlONrhkZ6LQ+s8TaX/MwqGxFmp1UhaMgZWQHoiJlVD3+JyFYmEUWl7dFEOxkLrYQlLIh+vbezW+umHnRaSuKEKPz6/q/fMrR3+uiNQVXKgogpXwe9lSUldQIVrm7uHp7wyPca5ngdQVTIiWeXn7yH/SOnjc3jtieSB1BREqLoNykgLZoPwTX+qqLKRfvBCgZabJ/GZ5VyWhsmvGtAwhdXkLSTLFdfS8hNTlJSTJuCxDSF3OQpDQZVyXmbyOdzkL6RexzzKE1OUlROv4LkNIXU5CuAXQIlWWIaQuJyFaBOCTGOgZF6QuJnTYH7FQLIxC+AetJ4RiYRQCZTfCGFgJ6YGYWAmB9PRCbSVdFg6NtVC92c6l9HBorIUmYkl+TeGrEf768AYhOTgZsrOpQrNgIWRi7oS+AcaBzjykR7w7AAAAAElFTkSuQmCC>
