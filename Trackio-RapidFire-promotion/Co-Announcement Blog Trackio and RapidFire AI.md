@@ -77,13 +77,9 @@ Each resulting model is evaluated using consistent metrics, enabling clear and r
 
 *Trackio dashboard comparing 4 fine-tuning runs with different hyperparameters. The plots show training loss, validation loss, learning rate schedules, and ROUGE-L scores—making it easy to identify which configuration (Run 4, in orange) achieves the lowest loss and best generation quality.*
 
-## **Multi-Objective Optimization in Practice**
-
-Production LLM systems are inherently multi-objective. Accuracy improvements that dramatically increase latency or cost are often unacceptable, while lower-cost configurations may fail quality thresholds.
-
-By combining Trackio’s interface with RapidFire AI’s parallel execution, teams can monitor and reason about these tradeoffs directly. This enables informed engineering decisions based on real data rather than intuition or trial-and-error.
-
 ## **Why This Matters for LLM Teams**
+
+By combining Trackio's visualization with RapidFire AI's parallel execution, teams can monitor and reason about tradeoffs directly—enabling informed engineering decisions based on real data rather than intuition or trial-and-error. 
 
 For individual engineers, the integration shortens feedback loops and reduces reliance on brittle, ad-hoc experimentation scripts. For teams, it creates shared, reproducible artifacts that make collaboration and review easier. For organizations, it reduces experimentation cost while increasing confidence in production deployments.
 
